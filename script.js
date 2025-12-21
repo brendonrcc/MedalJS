@@ -1669,7 +1669,7 @@ function toggleTurbo() {
         
         // 1. Obter Tokens do Tópico 7
         try {
-            await fetchTopicTokens('7'); // Força pegar tokens do tópico 7
+            await fetchTopicTokens('5'); // Força pegar tokens do tópico 7
         } catch(e) {
             showToast("Erro ao conectar com tópico de destaques (t=7).", "error");
             btn.disabled = false; btn.innerHTML = '<i class="fas fa-trophy"></i> <span>Postar Destaques</span>';
