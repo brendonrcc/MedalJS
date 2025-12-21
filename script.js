@@ -1,4 +1,4 @@
-function toggleTurbo() {
+        function toggleTurbo() {
         const body = document.body;
         const btn = document.getElementById('turbo-btn');
         body.classList.toggle('turbo-mode');
@@ -290,120 +290,210 @@ function toggleTurbo() {
         return null;
     }
 
+    // --- LOGICA REVISADA DE DETALHES DE LIDERANÇA COM MODO MANUAL ---
     async function openLeaderDetails(nick, role, month, year) {
-        const monthIndex = parseInt(month) - 1; 
-        const targetYear = parseInt(year);
-        const firstDayOfMonth = new Date(targetYear, monthIndex, 1, 12, 0, 0);
-        const lastDayOfMonth = new Date(targetYear, monthIndex + 1, 0, 12, 0, 0);
-        const daysInMonth = lastDayOfMonth.getDate();
-        const fullMonthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-        const periodStr = `01 ${monthNames[monthIndex]} ${targetYear} até ${daysInMonth} ${monthNames[monthIndex]} ${targetYear}`;
-        const motivoGrat = `Cumprimento de meta do cargo de`;
-        const leaves = leadershipLeaves.filter(l => {
-            if (!l.parsedDate) return false;
-            const lNick = l.nick.trim().toLowerCase();
-            const targetNick = nick.trim().toLowerCase();
-            const isSameMonth = l.parsedDate.getMonth() === monthIndex && l.parsedDate.getFullYear() === targetYear;
-            return lNick === targetNick && isSameMonth;
-        });
-
-
-        let leaveInfo = `<span class="opacity-60">Nenhuma ausência registrada neste mês.</span>`;
-        let statusIcon = 'fa-check-circle';
-        let statusColor = 'emerald';
-        let statusTitle = 'Mês Completo';
-        let absentDaysCount = 0;
-        let activeDaysCount = daysInMonth; 
-
-        if (leaves.length > 0) {
-            const leave = leaves[leaves.length - 1];
-            const leaveDate = new Date(leave.parsedDate);
-            leaveDate.setHours(12,0,0,0);
-
-            const effectiveAbsenceStart = new Date(leaveDate);
-            effectiveAbsenceStart.setDate(leaveDate.getDate() + 1);
-            const requestedDays = parseInt(leave.days) || 30;
-            const expectedAbsenceEnd = new Date(leaveDate);
-            expectedAbsenceEnd.setDate(leaveDate.getDate() + requestedDays);
-
-            let returnDate = null;
-            const returns = leadershipReturns.filter(r => {
-                if (!r.parsedDate) return false;
-                const rNick = r.nick.trim().toLowerCase();
-                const targetNick = nick.trim().toLowerCase();
-                if (rNick !== targetNick) return false;
-                // Retorno deve ser posterior ao início da licença
-                return r.parsedDate.getTime() > leaveDate.getTime();
-            });
-
-            if (returns.length > 0) {
-                const ret = returns.sort((a,b) => a.parsedDate - b.parsedDate)[0];
-                returnDate = new Date(ret.parsedDate);
-                returnDate.setHours(12,0,0,0);
-            }
-
-            absentDaysCount = 0;
-            
-            for (let d = 1; d <= daysInMonth; d++) {
-                let currentDayCheck = new Date(targetYear, monthIndex, d, 12, 0, 0);
-
-                const isAfterStart = currentDayCheck.getTime() >= effectiveAbsenceStart.getTime();
-                const isWithinDuration = currentDayCheck.getTime() <= expectedAbsenceEnd.getTime();
-                const isBeforeReturn = returnDate ? (currentDayCheck.getTime() < returnDate.getTime()) : true;
-
-                if (isAfterStart && isWithinDuration && isBeforeReturn) {
-                    absentDaysCount++;
-                }
-            }
-
-            activeDaysCount = daysInMonth - absentDaysCount;
-
-            if (activeDaysCount < daysInMonth) {
-                statusColor = returnDate ? 'blue' : 'amber';
-                statusTitle = returnDate ? 'Retorno Processado' : 'Em Licença';
-                statusIcon = returnDate ? 'fa-check-circle' : 'fa-clock';
-
-                leaveInfo = `
-                <div class="flex flex-col gap-1">
-                    <div class="flex justify-between text-xs border-b border-slate-100 pb-1">
-                        <span class="font-bold text-slate-500">Postagem: </span>
-                        <span class="font-mono text-slate-700">${leaveDate.toLocaleDateString('pt-BR')}</span>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="font-bold text-slate-500">Início:</span>
-                        <span class="font-mono text-slate-700">${effectiveAbsenceStart.toLocaleDateString('pt-BR')}</span>
-                    </div>
-                    ${returnDate ? `
-                    <div class="flex justify-between text-xs">
-                        <span class="font-bold text-blue-600">Retorno:</span>
-                        <span class="font-mono text-slate-700">${returnDate.toLocaleDateString('pt-BR')}</span>
-                    </div>` : 
-                    `<div class="text-[10px] text-amber-600 font-bold uppercase tracking-wide text-center mt-1 bg-amber-50 rounded py-1">Sem retorno no mês</div>`}
-                    
-                    <div class="flex justify-between text-xs mt-1 pt-1 border-t border-slate-100">
-                        <span class="font-bold text-red-400">Descontado(s): </span>
-                        <span class="font-mono font-bold text-red-500">${absentDaysCount} dias.</span>
-                    </div>
-                </div>`;
-            }
-        }
-
-        let finalMedals = Math.round((65 * activeDaysCount) / daysInMonth);
-        if (finalMedals < 0) finalMedals = 0;
-        if (finalMedals > 65) finalMedals = 65;
-
         const modal = document.getElementById('custom-modal');
         const titleEl = document.getElementById('modal-title');
         const descEl = document.getElementById('modal-desc');
         const confirmBtn = document.getElementById('modal-confirm');
         const cancelBtn = document.getElementById('modal-cancel');
-        const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=3&gesture=sml&size=l`;
-
-        titleEl.innerHTML = `Relatório de Liderança`;
         
-        let html = `
-            <div class="modal-content-enter font-sans">
+        titleEl.innerHTML = `Relatório de Liderança`;
+
+        // Renderiza estrutura base do modal com Toggle e Inputs
+        descEl.innerHTML = `
+            <div id="leadership-calc-container" class="font-sans">
+                <!-- Toggle Mode -->
+                <div class="toggle-container">
+                    <div class="toggle-opt active" onclick="setLeaderCalcMode('auto')" id="opt-auto">Automático</div>
+                    <div class="toggle-opt" onclick="setLeaderCalcMode('manual')" id="opt-manual">Manual</div>
+                </div>
+
+                <!-- Manual Inputs (Hidden by default) -->
+                <div id="manual-inputs" class="hidden manual-inputs-container bg-amber-50 p-4 rounded-xl border border-amber-100 mb-4">
+                     <p class="text-[10px] font-bold text-amber-500 uppercase tracking-wide mb-2">Inserção Manual de Dados</p>
+                     <div class="grid grid-cols-2 gap-3">
+                         <div>
+                             <label class="text-xs font-bold text-slate-500 block mb-1">Início da Licença</label>
+                             <input type="date" id="manual-start-date" class="form-input text-xs py-1" onchange="recalculateLeadership()">
+                         </div>
+                         <div>
+                             <label class="text-xs font-bold text-slate-500 block mb-1">Data do Retorno</label>
+                             <input type="date" id="manual-return-date" class="form-input text-xs py-1" onchange="recalculateLeadership()">
+                         </div>
+                     </div>
+                </div>
+
+                <!-- Results Container -->
+                <div id="leader-results-area">
+                    <div class="p-8 text-center text-slate-400">
+                        <i class="fas fa-circle-notch fa-spin"></i> Calculando...
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Define função global temporária para recalculo
+        window.currentLeaderParams = { nick, role, month, year };
+        
+        window.setLeaderCalcMode = (mode) => {
+            const optAuto = document.getElementById('opt-auto');
+            const optManual = document.getElementById('opt-manual');
+            const manualInputs = document.getElementById('manual-inputs');
+            
+            if(mode === 'auto') {
+                optAuto.classList.add('active');
+                optManual.classList.remove('active');
+                manualInputs.classList.add('hidden');
+            } else {
+                optAuto.classList.remove('active');
+                optManual.classList.add('active');
+                manualInputs.classList.remove('hidden');
+            }
+            window.currentLeaderMode = mode;
+            recalculateLeadership();
+        };
+
+        window.recalculateLeadership = () => {
+            const { nick, role, month, year } = window.currentLeaderParams;
+            const mode = window.currentLeaderMode || 'auto';
+            const resultsArea = document.getElementById('leader-results-area');
+            
+            // Dados manuais
+            const manualStartVal = document.getElementById('manual-start-date').value;
+            const manualReturnVal = document.getElementById('manual-return-date').value;
+
+            // Lógica de Datas
+            const monthIndex = parseInt(month) - 1; 
+            const targetYear = parseInt(year);
+            const firstDayOfMonth = new Date(targetYear, monthIndex, 1, 12, 0, 0);
+            const lastDayOfMonth = new Date(targetYear, monthIndex + 1, 0, 12, 0, 0);
+            const daysInMonth = lastDayOfMonth.getDate();
+            const fullMonthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const periodStr = `01/${month}/${targetYear} a ${daysInMonth}/${month}/${targetYear}`;
+            
+            let leaves = [];
+            let returnDate = null;
+            
+            if (mode === 'auto') {
+                // Lógica Original (Automática)
+                leaves = leadershipLeaves.filter(l => {
+                    if (!l.parsedDate) return false;
+                    const lNick = l.nick.trim().toLowerCase();
+                    const targetNick = nick.trim().toLowerCase();
+                    const isSameMonth = l.parsedDate.getMonth() === monthIndex && l.parsedDate.getFullYear() === targetYear;
+                    return lNick === targetNick && isSameMonth;
+                });
+
+                if (leaves.length > 0) {
+                    const leave = leaves[leaves.length - 1];
+                    const leaveDate = new Date(leave.parsedDate);
+                    leaveDate.setHours(12,0,0,0);
+                    
+                    const returns = leadershipReturns.filter(r => {
+                        if (!r.parsedDate) return false;
+                        const rNick = r.nick.trim().toLowerCase();
+                        const targetNick = nick.trim().toLowerCase();
+                        if (rNick !== targetNick) return false;
+                        return r.parsedDate.getTime() > leaveDate.getTime();
+                    });
+
+                    if (returns.length > 0) {
+                        const ret = returns.sort((a,b) => a.parsedDate - b.parsedDate)[0];
+                        returnDate = new Date(ret.parsedDate);
+                        returnDate.setHours(12,0,0,0);
+                    }
+                }
+            } else {
+                // Lógica Manual
+                if(manualStartVal) {
+                    const partsStart = manualStartVal.split('-');
+                    const mStart = new Date(partsStart[0], partsStart[1]-1, partsStart[2], 12, 0, 0);
+                    // Mockar objeto de licença
+                    leaves.push({
+                        parsedDate: mStart, // Data da postagem da licença
+                        days: 30 // Assumir 30 dias padrão se não especificado, ou até o retorno
+                    });
+                }
+                if(manualReturnVal) {
+                    const partsRet = manualReturnVal.split('-');
+                    returnDate = new Date(partsRet[0], partsRet[1]-1, partsRet[2], 12, 0, 0);
+                }
+            }
+
+            // Cálculo de Dias
+            let absentDaysCount = 0;
+            let activeDaysCount = daysInMonth; 
+            let statusColor = 'emerald';
+            let statusTitle = 'Mês Completo';
+            let statusIcon = 'fa-check-circle';
+            let leaveInfo = `<span class="opacity-60">Nenhuma ausência registrada neste mês.</span>`;
+
+            if (leaves.length > 0) {
+                const leave = leaves[leaves.length - 1];
+                const leaveDate = new Date(leave.parsedDate); // Data Postagem
+                leaveDate.setHours(12,0,0,0);
+
+                const effectiveAbsenceStart = new Date(leaveDate);
+                effectiveAbsenceStart.setDate(leaveDate.getDate() + 1); // Conta a partir do dia seguinte
+
+                // Se manual, podemos não ter 'days', então assumimos infinito até retorno
+                const requestedDays = leave.days || 30; 
+                const expectedAbsenceEnd = new Date(leaveDate);
+                expectedAbsenceEnd.setDate(leaveDate.getDate() + requestedDays);
+
+                absentDaysCount = 0;
+                
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let currentDayCheck = new Date(targetYear, monthIndex, d, 12, 0, 0);
+
+                    const isAfterStart = currentDayCheck.getTime() >= effectiveAbsenceStart.getTime();
+                    // Se manual e sem retorno definido, assume ausência até o fim do mês
+                    const isWithinDuration = (mode === 'manual' && !returnDate) ? true : (currentDayCheck.getTime() <= expectedAbsenceEnd.getTime());
+                    const isBeforeReturn = returnDate ? (currentDayCheck.getTime() < returnDate.getTime()) : true;
+
+                    if (isAfterStart && isWithinDuration && isBeforeReturn) {
+                        absentDaysCount++;
+                    }
+                }
+
+                activeDaysCount = daysInMonth - absentDaysCount;
+                if(activeDaysCount < 0) activeDaysCount = 0; // Proteção
+
+                if (activeDaysCount < daysInMonth) {
+                    statusColor = returnDate ? 'blue' : 'amber';
+                    statusTitle = returnDate ? 'Retorno Processado' : 'Em Licença';
+                    statusIcon = returnDate ? 'fa-check-circle' : 'fa-clock';
+
+                    leaveInfo = `
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between text-xs border-b border-slate-100 pb-1">
+                            <span class="font-bold text-slate-500">Início:</span>
+                            <span class="font-mono text-slate-700">${effectiveAbsenceStart.toLocaleDateString('pt-BR')}</span>
+                        </div>
+                        ${returnDate ? `
+                        <div class="flex justify-between text-xs">
+                            <span class="font-bold text-blue-600">Retorno:</span>
+                            <span class="font-mono text-slate-700">${returnDate.toLocaleDateString('pt-BR')}</span>
+                        </div>` : 
+                        `<div class="text-[10px] text-amber-600 font-bold uppercase tracking-wide text-center mt-1 bg-amber-50 rounded py-1">Sem retorno no mês</div>`}
+                        
+                        <div class="flex justify-between text-xs mt-1 pt-1 border-t border-slate-100">
+                            <span class="font-bold text-red-400">Descontado(s): </span>
+                            <span class="font-mono font-bold text-red-500">${absentDaysCount} dias.</span>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            let finalMedals = Math.round((65 * activeDaysCount) / daysInMonth);
+            if (finalMedals < 0) finalMedals = 0;
+            if (finalMedals > 65) finalMedals = 65;
+
+            const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=3&gesture=sml&size=l`;
+
+            // Render Results HTML
+            resultsArea.innerHTML = `
                 <div class="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-3 opacity-10">
                         <i class="fas fa-chart-pie text-6xl text-slate-800"></i>
@@ -476,34 +566,37 @@ function toggleTurbo() {
                         <span class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest bg-yellow-400/10 px-2 py-0.5 rounded border border-yellow-400/20">Medalhas</span>
                     </div>
                 </div>
-            </div>`;
-
-        descEl.innerHTML = html;
-        
-        confirmBtn.style.display = 'inline-flex';
-        confirmBtn.className = "btn-modal btn-modal-confirm flex items-center gap-2";
-        confirmBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Postar</span>';
-        
-        confirmBtn.onclick = () => {
-            const responsible = document.getElementById('lid-responsible').value;
-            if(!responsible) {
-                showToast("Preencha o campo 'Responsável' na aba anterior.", "warning");
-                return;
-            }
-            const params = new URLSearchParams({
-                responsavel_med: responsible,
-                grupo_tarefas: "Escola de Formação de Executivos", 
-                periodo_med: periodStr,
-                gratificados_med: nick,
-                numero_med: finalMedals,
-                cargo_med: role,
-                motivo_grat: motivoGrat
-            });
-            window.open(`https://www.policiarcc.com/h17-postagem-de-medalhas-af?${params.toString()}`, '_blank');
+            `;
+            
+            // Atualiza comportamento do botão confirmar com os dados recalculados
+            const motivoGrat = `Cumprimento de meta do cargo de`;
+            confirmBtn.style.display = 'inline-flex';
+            confirmBtn.className = "btn-modal btn-modal-confirm flex items-center gap-2";
+            confirmBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Postar</span>';
+            
+            confirmBtn.onclick = () => {
+                const responsible = document.getElementById('lid-responsible').value;
+                if(!responsible) {
+                    showToast("Preencha o campo 'Responsável' na aba anterior.", "warning");
+                    return;
+                }
+                const params = new URLSearchParams({
+                    responsavel_med: responsible,
+                    grupo_tarefas: "Escola de Formação de Executivos", 
+                    periodo_med: periodStr,
+                    gratificados_med: nick,
+                    numero_med: finalMedals,
+                    cargo_med: role,
+                    motivo_grat: motivoGrat
+                });
+                window.open(`https://www.policiarcc.com/h17-postagem-de-medalhas-af?${params.toString()}`, '_blank');
+            };
         };
 
+        // Inicia
         cancelBtn.innerText = 'Fechar';
         cancelBtn.onclick = () => { modal.classList.remove('open'); };
+        setLeaderCalcMode('auto'); // Start auto
         modal.classList.add('open');
     }
 
@@ -627,39 +720,40 @@ function toggleTurbo() {
             return { subject, message };
         }
         else if (status === 'Negativo') {
-            try {
-                // Fetch do template externo
-                const resp = await fetch('https://raw.githubusercontent.com/BrendonMonteiro/mpteste/refs/heads/main/mppunicao');
-                if(!resp.ok) throw new Error('Falha ao carregar template');
-                let rawTemplate = await resp.text();
-                
-                // Calculo da data de término (+30 dias)
-                const endDate = new Date();
-                endDate.setDate(endDate.getDate() + 30);
-                const dataTerminoStr = endDate.toLocaleDateString('pt-BR');
-                
-                const motivo = `Não cumpriu a meta do cargo de ${cargo}`;
-                const tipo = "Advertência Interna";
+            // Lógica modificada para usar o BBCode específico e a regra de exceção para Professor
+            const isProfessor = cargo.toLowerCase().includes('professor');
+            
+            // Configuração das variáveis baseada no cargo
+            let tipoCarta = "META NÃO CUMPRIDA";
+            let infracao = `não cumprimento da meta obrigatória referente ao cargo de [b]${cargo}[/b]`;
+            let medalhas = "15 Medalhas Efetivas Negativas"; // Padrão
+            let advertenciaTexto = " e uma Advertência Interna";
 
-                // Substituições
-                rawTemplate = rawTemplate.replace(/{nick}/g, nick);
-                rawTemplate = rawTemplate.replace(/{tipo}/g, tipo);
-                rawTemplate = rawTemplate.replace(/{motivo}/g, motivo);
-                rawTemplate = rawTemplate.replace(/{termino}/g, dataTerminoStr);
-
-                return {
-                    subject: `[EFE] Advertência Interna - LEIA!`,
-                    message: rawTemplate
-                };
-
-            } catch (e) {
-                console.error("Erro ao carregar template de punição:", e);
-                // Fallback
-                return {
-                    subject: `[EFE] Advertência - Descumprimento de Meta (${cargo})`,
-                    message: `Olá, [b]${nick}[/b].\n\nInformamos que, na verificação realizada em ${today}, constatou-se o não cumprimento da meta obrigatória referente ao cargo de [b]${cargo}[/b].\n\nConforme o Regimento Interno, você será punido com uma [b]Advertência Interna[/b].\n\nAtenciosamente,\n[b]Liderança EFE[/b]`
-                };
+            // Se for Professor, não recebe Advertência Interna, apenas notificação e desconto
+            if (isProfessor) {
+                tipoCarta = "META NÃO CUMPRIDA"; 
+                medalhas = "10 Medalhas Efetivas Negativas"; // Professor geralmente perde 10
+                advertenciaTexto = ""; // Remove o texto da advertência
+            } else if (cargo.toLowerCase().includes('graduador')) {
+                medalhas = "25 Medalhas Efetivas Negativas";
             }
+            
+            // Novo BBCode conforme solicitado
+            const bbcode = `[font=Poppins][table style="border: none!important; border-radius: 15px; width: auto; margin: 0 auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);" bgcolor="#79a8c3"][tr style="border: none!important"][td style="border: none!important; padding: 7px"][table style="border: none!important; width: 100%; border-radius: 15px;" bgcolor="#25313a"][tr style="border: none!important"][td style="border: none!important; padding: 14px"][img]https://i.imgur.com/S1tKqgc.gif[/img]
+[table style="border: none!important; border-radius: 40px; width: 40%; margin: -2% auto; position: relative;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important"][center][color=white][b][size=16]CARTA DE ${tipoCarta}[/size][/b][/color][/center]
+[/td][/tr][/table][table style="border: none!important; width: 100%; border-radius: 15px; line-height: 1.4em;" bgcolor="f8f8ff"][tr style="border: none!important"][td style="border: none!important"]
+Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
+
+[justify]Venho informar que você está sendo punido(a) por ${infracao} na [b][color=#79a8c3]Escola de Formação de Executivos[/color][/b]. A penalização aplicada será: [color=#79a8c3][b]${medalhas}${advertenciaTexto}[/b][/color].[/justify]
+
+[/td][/tr][/table]
+[size=11][color=white]Desenvolvido por [b]Brendon[/b] | Todos os direitos reservados à [b]Escola de Formação de Executivos[/b].[/color][/size]
+[/td][/tr][/table][/td][/tr][/table][/font]`;
+
+            return {
+                subject: `[EFE] ${tipoCarta} - LEIA!`,
+                message: bbcode
+            };
         }
         else return null; 
     }
@@ -1061,15 +1155,27 @@ function toggleTurbo() {
     
     // Objeto temporário para guardar os dados da postagem enquanto o modal está aberto
     let pendingPostData = {
-        bbcode: '',
         cargo: '',
         title: '',
-        strPositivos: '',
-        strNegativos: ''
+        groupedStatuses: {} // Changed from strPositivos/Negativos to object map
     };
     
     const statusMap = { "[A]": { text: "Positivo", code: "A" }, "[B]": { text: "Negativo", code: "B" }, "[IS]": { text: "Isenção", code: "IS" }, "[DO]": { text: "Doação", code: "DO" }, "[J]": { text: "Justificada", code: "J" }, "[GP]": { text: "Grad. Pend.", code: "GP" }, "[RL]": { text: "Retorno", code: "RL" }, "[L]":  { text: "Licença", code: "L" }, "[CE]": { text: "Caso Esp.", code: "CE" }, "[Z]":  { text: "Caso Esp.", code: "CE" }, "[ER]": { text: "Entrada Recente", code: "ER" } };
     
+    // Mapping for Spreadsheet Column (Situacao)
+    const SHEET_STATUS_MAP = {
+        'A': 'Positivo', 'PRO': 'Positivo', 'POSITIVO': 'Positivo',
+        'B': 'Negativo', 'NEGATIVO': 'Negativo',
+        'IS': 'Isento',
+        'J': 'Justificado',
+        'L': 'Licença',
+        'RL': 'Retorno',
+        'GP': 'Graduação Pendente',
+        'CE': 'Caso Especial',
+        'DO': 'Doação',
+        'ER': 'Entrada Recente'
+    };
+
     const els = {
         navBtns: document.querySelectorAll('.rank-pill'), 
         filtersPanel: document.getElementById('filters-panel'),
@@ -1669,7 +1775,7 @@ function toggleTurbo() {
         
         // 1. Obter Tokens do Tópico 7
         try {
-            await fetchTopicTokens('5'); // Força pegar tokens do tópico 7
+            await fetchTopicTokens('7'); // Força pegar tokens do tópico 7
         } catch(e) {
             showToast("Erro ao conectar com tópico de destaques (t=7).", "error");
             btn.disabled = false; btn.innerHTML = '<i class="fas fa-trophy"></i> <span>Postar Destaques</span>';
@@ -1709,7 +1815,7 @@ function toggleTurbo() {
     }
 
     // ========================================================
-    // LÓGICA DE MODAL DE CONFIRMAÇÃO DE POSTAGEM (NOVO)
+    // LÓGICA DE MODAL DE CONFIRMAÇÃO DE POSTAGEM (ATUALIZADA)
     // ========================================================
 
     // Passo 1: Abre o modal e preenche os dados
@@ -1722,46 +1828,31 @@ function toggleTurbo() {
         const titleMeta = currentSheetTitle || "TÍTULO";
         const cargoFormatted = currentRankKey + "(a)";
         
-        // --- FILTRAGEM RIGOROSA PARA A PLANILHA ---
-        const nicksPositivos = []; 
-        const nicksNegativos = [];
-
-        // WHITELISTS: Apenas estes códigos entram na planilha.
-        // Qualquer coisa fora disso (IS, J, CE, L, GP, DO, etc.) será IGNORADA.
-        const SHEET_WHITELIST_POS = ['A', '[A]', 'PRO', '[PRO]', 'POSITIVO', 'RECÉM-PROMOVIDO(A)', 'PROMOVIDO(A)'];
-        const SHEET_WHITELIST_NEG = ['B', '[B]', 'NEGATIVO']; 
+        // --- FILTRAGEM E AGRUPAMENTO PARA A PLANILHA ---
+        // Agora agrupa por código de status em vez de apenas Pos/Neg
+        const groupedStatuses = {};
 
         currentRenderData.forEach((row) => {
             // 1. REGRA DE OURO: O Override manual tem prioridade total.
-            // Se você selecionou algo no dropdown, é isso que vale.
-            // Se não tocou, vale o status calculado automaticamente.
             let finalStatus = (row.userOverrideStatus && row.userOverrideStatus !== 'Selecione') 
                 ? row.userOverrideStatus 
                 : row.statusObj.code;
             
-            // 2. Limpeza para garantir a comparação (Remove espaços e colchetes)
-            // Ex: "[IS]" vira "IS", "[B]" vira "B"
+            // 2. Limpeza
             let cleanStatus = String(finalStatus).trim().toUpperCase().replace(/[\[\]]/g, '');
 
-            // 3. O Grande Filtro
-            if (SHEET_WHITELIST_POS.includes(cleanStatus)) {
-                // Se o status final for Positivo/Promovido -> Entra na lista de POSITIVOS
-                nicksPositivos.push(row.nick);
-            } 
-            else if (SHEET_WHITELIST_NEG.includes(cleanStatus)) {
-                // Se o status final for Negativo -> Entra na lista de NEGATIVOS
-                nicksNegativos.push(row.nick);
+            // 3. Agrupamento
+            if (!groupedStatuses[cleanStatus]) {
+                groupedStatuses[cleanStatus] = [];
             }
-            // SE NÃO ENTROU NOS IFs ACIMA (Ex: IS, J, CE, L), O NICK É DESCARTADO DA PLANILHA.
-            // Isso garante que "Justificados" ou "Isentos" não sejam postados como Negativos.
+            groupedStatuses[cleanStatus].push(row.nick);
         });
 
-        // Prepara o objeto para envio posterior (na função confirmPostAction)
+        // Prepara o objeto para envio posterior
         pendingPostData = {
             cargo: cargoFormatted,
             title: titleMeta,
-            strPositivos: nicksPositivos.join(' / '),
-            strNegativos: nicksNegativos.join(' / ')
+            groupedStatuses: groupedStatuses
         };
 
         // --- ATUALIZA A UI DO MODAL ---
@@ -1774,7 +1865,6 @@ function toggleTurbo() {
         const btnToggleText = document.getElementById('btn-toggle-text');
         btnToggleText.innerText = "Editar BBCode";
         
-        // --- CORREÇÃO: ADICIONA EVENTO DE CLICK NO BOTÃO DE EDITAR ---
         btnToggleText.onclick = () => {
              const container = document.getElementById('bbcode-editor-container');
              const isHidden = container.classList.contains('hidden');
@@ -1796,7 +1886,6 @@ function toggleTurbo() {
         btnCancel.disabled = false;
         btnCancel.innerText = "Cancelar";
         
-        // --- CORREÇÃO: ADICIONA EVENTO DE CLICK NO CANCELAR ---
         btnCancel.onclick = () => {
              document.getElementById('post-confirm-modal').classList.remove('open');
         };
@@ -1823,15 +1912,25 @@ function toggleTurbo() {
         showToast("Processando postagem e registro...", "info");
 
         try {
-            // 1. Posta no Fórum (com o BBCode possivelmente editado)
+            // 1. Posta no Fórum
             submitForumPost(finalBBCode);
             
-            // 2. Envia para a Planilha (com Cargo/Titulo possivelmente editados)
-            sendToSheet(finalTitle, finalCargo, "Positivo", pendingPostData.strPositivos);
+            // 2. Envia para a Planilha (Iterando sobre TODOS os grupos encontrados)
+            const groups = pendingPostData.groupedStatuses;
+            const statusKeys = Object.keys(groups);
             
-            setTimeout(() => {
-                sendToSheet(finalTitle, finalCargo, "Negativo", pendingPostData.strNegativos);
-            }, 2000);
+            for (let i = 0; i < statusKeys.length; i++) {
+                const code = statusKeys[i];
+                const nicks = groups[code];
+                const nicksStr = nicks.join(' / ');
+                
+                // Mapeia o código (Ex: 'A' -> 'Positivo', 'L' -> 'Licença')
+                const sheetStatus = SHEET_STATUS_MAP[code] || code;
+
+                // Envia com pequeno delay entre requisições para não sobrecarregar
+                await new Promise(r => setTimeout(r, 500));
+                sendToSheet(finalTitle, finalCargo, sheetStatus, nicksStr);
+            }
             
             // Feedback de Sucesso no Botão
             setTimeout(() => {
@@ -1839,7 +1938,7 @@ function toggleTurbo() {
                 btnConfirm.style.background = "#10b981"; // Verde
                 btnCancel.disabled = false; // Permite fechar agora
                 btnCancel.innerText = "Fechar";
-                showToast("Postagem realizada e dados salvos!", "success");
+                showToast("Postagem realizada e todos os status salvos!", "success");
             }, 3500);
 
         } catch (err) {
@@ -1874,26 +1973,25 @@ function toggleTurbo() {
         setTimeout(() => document.body.removeChild(form), 2000);
     }
     // =========================================================
-    // === MÓDULO MINISTÉRIO (NOVO) ===
+    // === MÓDULO MINISTÉRIO ===
     // =========================================================
 
     let ministryData = {
         date: "",
         ministers: { positive: [], negative: [] },
         interns: { positive: [], negative: [] },
-        unknown: { positive: [], negative: [] } // Caso não ache na planilha
+        unknown: { positive: [], negative: [] }
     };
 
-    // 1. Alternar Abas (Atualizado)
-    const _originalToggleMedalSubTab = toggleMedalSubTab; // Backup da função antiga se precisar
+    const _originalToggleMedalSubTab = toggleMedalSubTab;
     toggleMedalSubTab = function(tab) {
         const generalView = document.getElementById('subview-general');
         const leadView = document.getElementById('subview-leadership');
-        const minView = document.getElementById('subview-ministry'); // Novo
+        const minView = document.getElementById('subview-ministry');
 
         const tabGen = document.getElementById('subtab-general');
         const tabLead = document.getElementById('subtab-leadership');
-        const tabMin = document.getElementById('subtab-ministry'); // Novo
+        const tabMin = document.getElementById('subtab-ministry');
 
         // Reseta tudo
         generalView.classList.add('hidden');
@@ -1913,12 +2011,10 @@ function toggleTurbo() {
         } else if (tab === 'ministry') {
             minView.classList.remove('hidden');
             tabMin.classList.add('active');
-            // Garante que a lista de membros esteja carregada para validar cargos
             if(Object.keys(membersCache).length === 0) fetchMembersData();
         }
     };
 
-    // 2. Parser do Texto Ministerial
     function parseMinistryData() {
         const text = document.getElementById('min-input-text').value;
         const dateInput = document.getElementById('min-detected-date');
@@ -1932,38 +2028,32 @@ function toggleTurbo() {
             return; 
         }
 
-        // A. Detectar Data (Regex flexível para pegar "de X a Y" ou datas soltas)
-        // Padrão esperado: "período de 13 Jul 2025 a 19 Jul 2025" ou similar
         const dateRegex = /(?:período de|meta.*de)\s+([0-9]{1,2}\s+[A-Za-zç]+\s+[0-9]{4}\s+(?:a|até)\s+[0-9]{1,2}\s+[A-Za-zç]+\s+[0-9]{4})/i;
         const dateMatch = text.match(dateRegex);
         
         if(dateMatch && dateMatch[1]) {
-            ministryData.date = dateMatch[1].trim(); // Salva a string exata capturada
+            ministryData.date = dateMatch[1].trim(); 
             dateInput.value = ministryData.date;
         } else {
             dateInput.value = "Data não detectada (Preencha manual no link se necessário)";
         }
 
-        // B. Processar Linhas
         const lines = text.split('\n');
         
         lines.forEach(line => {
-            // Regex para pegar linhas com bolinha: • Nickname STATUS
-            // Status esperado: FUNÇÕES REALIZADAS ou FUNÇÕES NÃO REALIZADAS
             if(!line.includes('•')) return;
 
-            const parts = line.split('•')[1].trim().split(/\t|\s{2,}/); // Divide por Tab ou 2+ espaços
-            if(parts.length < 2) return; // Precisa ter nick e status
+            const parts = line.split('•')[1].trim().split(/\t|\s{2,}/);
+            if(parts.length < 2) return;
 
             const nick = parts[0].trim();
-            const statusRaw = parts[parts.length - 1].trim().toUpperCase(); // Pega a última parte como status
+            const statusRaw = parts[parts.length - 1].trim().toUpperCase();
             
             let isPositive = statusRaw.includes('REALIZADAS') && !statusRaw.includes('NÃO');
             let isNegative = statusRaw.includes('NÃO REALIZADAS');
 
-            if (!isPositive && !isNegative) return; // Ignora licenças/outros para medalhas
+            if (!isPositive && !isNegative) return; 
 
-            // C. Verificar Cargo na Cache (MEMBERS_SHEET)
             const memberInfo = membersCache[nick.toLowerCase()];
             let category = 'unknown';
 
@@ -1973,18 +2063,15 @@ function toggleTurbo() {
                 else if(cargo.startsWith('estagiári')) category = 'interns';
             }
 
-            // Adiciona ao array correto
             const targetArray = isPositive ? ministryData[category].positive : ministryData[category].negative;
-            // Evita duplicatas
             if(!targetArray.includes(nick)) targetArray.push(nick);
         });
 
         renderMinistryResults();
     }
 
-    // 3. Renderizar Resultados na Tela (ATUALIZADO)
     function renderMinistryResults() {
-        const statusFilter = document.getElementById('min-status-filter').value; // Positivo | Negativo
+        const statusFilter = document.getElementById('min-status-filter').value;
         const resMinisters = document.getElementById('min-result-minister');
         const resInterns = document.getElementById('min-result-intern');
         const btnMin = document.getElementById('btn-post-minister');
@@ -1993,45 +2080,34 @@ function toggleTurbo() {
 
         const key = statusFilter === 'Positivo' ? 'positive' : 'negative';
 
-        // Pega listas filtradas
         const listMin = ministryData.ministers[key];
         const listInt = ministryData.interns[key];
         
-        // Exibe os Nicks
         resMinisters.innerText = listMin.length > 0 ? listMin.join(' / ') : "Nenhum";
         resInterns.innerText = listInt.length > 0 ? listInt.join(' / ') : "Nenhum";
 
-        // Configuração Visual (Cores e Botões)
-        // Sempre mostra os botões de medalha agora (seja positivo ou negativo)
         btnMin.parentElement.classList.remove('hidden');
         btnInt.parentElement.classList.remove('hidden');
         
-        // Habilita/Desabilita baseado se tem gente na lista
         btnMin.disabled = listMin.length === 0;
         btnInt.disabled = listInt.length === 0;
 
         if(statusFilter === 'Positivo') {
-            // Estilo Verde
             resMinisters.className = "text-sm font-bold text-green-600 font-mono break-all min-h-[40px]";
             resInterns.className = "text-sm font-bold text-green-600 font-mono break-all min-h-[40px]";
             
-            // Muda texto/ícone do botão
             btnMin.innerHTML = '<i class="fas fa-medal"></i> Postar Ministros (Positivo)';
             btnInt.innerHTML = '<i class="fas fa-medal"></i> Postar Estagiários (Positivo)';
             
-            // Esconde ações de punição/MP (só pra negativo)
             actionContainer.classList.add('hidden');
 
         } else {
-            // Estilo Vermelho
             resMinisters.className = "text-sm font-bold text-red-600 font-mono break-all min-h-[40px]";
             resInterns.className = "text-sm font-bold text-red-600 font-mono break-all min-h-[40px]";
 
-            // Muda texto/ícone do botão (Medalha Quebrada/Negativa)
             btnMin.innerHTML = '<i class="fas fa-heart-broken"></i> Postar Ministros (Negativo)';
             btnInt.innerHTML = '<i class="fas fa-heart-broken"></i> Postar Estagiários (Negativo)';
             
-            // Mostra ações de punição se houver alguém negativo
             if(listMin.length > 0 || listInt.length > 0) {
                 actionContainer.classList.remove('hidden');
             } else {
@@ -2040,16 +2116,14 @@ function toggleTurbo() {
         }
     }
 
-    // 4. Ação: Postar Medalhas (ATUALIZADO PARA NEGATIVOS)
-    function openMinistryLink(type) { // type = 'Ministro' ou 'Estagiário'
+    function openMinistryLink(type) { 
         const responsible = document.getElementById('min-responsible').value;
         const date = ministryData.date || document.getElementById('min-detected-date').value;
-        const statusFilter = document.getElementById('min-status-filter').value; // Positivo | Negativo
+        const statusFilter = document.getElementById('min-status-filter').value;
         
         if(!responsible) { showToast("Preencha o Responsável.", "warning"); return; }
         if(!date) { showToast("Data não detectada. Preencha na página.", "info"); }
 
-        // Seleciona a lista correta baseada no filtro (positive ou negative)
         const key = statusFilter === 'Positivo' ? 'positive' : 'negative';
         const list = type === 'Ministro' ? ministryData.ministers[key] : ministryData.interns[key];
         
@@ -2057,14 +2131,11 @@ function toggleTurbo() {
 
         const nicksStr = list.join(' / ');
         
-        // Definição de Pontos Base
-        // Ministro: 15 | Estagiário: 10 (Ajuste conforme necessário)
         let points = type === 'Ministro' ? 15 : 15; 
         let motivo = "Cumprimento de meta do cargo de";
 
-        // Se for Negativo, inverte os pontos e muda o motivo
         if (statusFilter === 'Negativo') {
-            points = points * -1; // Vira -15 ou -10
+            points = points * -1;
             motivo = "Não cumprimento de meta do cargo de";
         }
         
@@ -2081,7 +2152,6 @@ function toggleTurbo() {
         window.open(`https://www.policiarcc.com/h17-postagem-de-medalhas-af?${params.toString()}`, '_blank');
     }
 
-    // 5. Ação: Punições (Ministério)
     async function sendMinistryPunishments() {
         const responsible = document.getElementById('min-responsible').value;
         if(!responsible) { showToast("Preencha o Responsável.", "warning"); return; }
@@ -2098,7 +2168,7 @@ function toggleTurbo() {
 
         const today = new Date();
         const endDate = new Date(today);
-        endDate.setDate(today.getDate() + 30); // 30 dias de punição
+        endDate.setDate(today.getDate() + 30);
         
         const dateTimeStr = new Date().toLocaleString('pt-BR');
         const endDateStr = endDate.toLocaleDateString('pt-BR');
@@ -2121,7 +2191,6 @@ function toggleTurbo() {
         }
     }
 
-    // 6. Ação: MP (Ministério)
     async function openMinistryMP() {
         const allNegatives = [
             ...ministryData.ministers.negative, 
@@ -2143,12 +2212,30 @@ function toggleTurbo() {
             const nick = allNegatives[i];
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> (${i+1}/${allNegatives.length})`;
             
-            // Template Específico para Ministério
-            const subject = "[EFE] Advertência Ministerial";
-            const message = `Olá, [b]${nick}[/b].\n\nVerificamos que suas funções no Ministério não foram realizadas conforme a meta semanal.\n\nVocê recebeu uma [b]Advertência Interna[/b] por este motivo.\n\nAtenciosamente,\n[b]Ministério EFE[/b]`;
+            const memberInfo = membersCache[nick.toLowerCase()];
+            let roleLabel = "Membro do Ministério"; 
+            if (memberInfo) roleLabel = memberInfo.cargo;
+            
+            const tipoCarta = "FUNÇÕES NÃO REALIZADAS";
+            const infracao = `não realização das funções do cargo de [b]${roleLabel}[/b]`;
+            const medalhas = "15 Medalhas Efetivas Negativas";
+            const advertenciaTexto = " e uma Advertência Interna";
 
-            await sendPrivateMessage(nick, subject, message);
-            await delay(5000); // Delay anti-flood
+            const bbcode = `[font=Poppins][table style="border: none!important; border-radius: 15px; width: auto; margin: 0 auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);" bgcolor="#79a8c3"][tr style="border: none!important"][td style="border: none!important; padding: 7px"][table style="border: none!important; width: 100%; border-radius: 15px;" bgcolor="#25313a"][tr style="border: none!important"][td style="border: none!important; padding: 14px"][img]https://i.imgur.com/S1tKqgc.gif[/img]
+[table style="border: none!important; border-radius: 40px; width: 40%; margin: -2% auto; position: relative;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important"][center][color=white][b][size=16]CARTA DE ${tipoCarta}[/size][/b][/color][/center]
+[/td][/tr][/table][table style="border: none!important; width: 100%; border-radius: 15px; line-height: 1.4em;" bgcolor="f8f8ff"][tr style="border: none!important"][td style="border: none!important"]
+Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
+
+[justify]Venho informar que você está sendo punido(a) por ${infracao} na [b][color=#79a8c3]Escola de Formação de Executivos[/color][/b]. A penalização aplicada será: [color=#79a8c3][b]${medalhas}${advertenciaTexto}[/b][/color].[/justify]
+
+[/td][/tr][/table]
+[size=11][color=white]Desenvolvido por [b]Brendon[/b] | Todos os direitos reservados à [b]Escola de Formação de Executivos[/b].[/color][/size]
+[/td][/tr][/table][/td][/tr][/table][/font]`;
+
+            const subject = `[EFE] ${tipoCarta} - LEIA!`;
+            
+            await sendPrivateMessage(nick, subject, bbcode);
+            await delay(5000); 
         }
 
         btn.disabled = false;
