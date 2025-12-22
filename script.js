@@ -1,4 +1,4 @@
-        function toggleTurbo() {
+    function toggleTurbo() {
         const body = document.body;
         const btn = document.getElementById('turbo-btn');
         body.classList.toggle('turbo-mode');
