@@ -1,4 +1,4 @@
-    function toggleTurbo() {
+        function toggleTurbo() {
         const body = document.body;
         const btn = document.getElementById('turbo-btn');
         body.classList.toggle('turbo-mode');
@@ -290,7 +290,6 @@
         return null;
     }
 
-    // --- LOGICA REVISADA DE DETALHES DE LIDERANÇA COM MODO MANUAL ---
     async function openLeaderDetails(nick, role, month, year) {
         const modal = document.getElementById('custom-modal');
         const titleEl = document.getElementById('modal-title');
@@ -300,16 +299,13 @@
         
         titleEl.innerHTML = `Relatório de Liderança`;
 
-        // Renderiza estrutura base do modal com Toggle e Inputs
         descEl.innerHTML = `
             <div id="leadership-calc-container" class="font-sans">
-                <!-- Toggle Mode -->
                 <div class="toggle-container">
                     <div class="toggle-opt active" onclick="setLeaderCalcMode('auto')" id="opt-auto">Automático</div>
                     <div class="toggle-opt" onclick="setLeaderCalcMode('manual')" id="opt-manual">Manual</div>
                 </div>
 
-                <!-- Manual Inputs (Hidden by default) -->
                 <div id="manual-inputs" class="hidden manual-inputs-container bg-amber-50 p-4 rounded-xl border border-amber-100 mb-4">
                      <p class="text-[10px] font-bold text-amber-500 uppercase tracking-wide mb-2">Inserção Manual de Dados</p>
                      <div class="grid grid-cols-2 gap-3">
@@ -324,7 +320,6 @@
                      </div>
                 </div>
 
-                <!-- Results Container -->
                 <div id="leader-results-area">
                     <div class="p-8 text-center text-slate-400">
                         <i class="fas fa-circle-notch fa-spin"></i> Calculando...
@@ -333,7 +328,6 @@
             </div>
         `;
         
-        // Define função global temporária para recalculo
         window.currentLeaderParams = { nick, role, month, year };
         
         window.setLeaderCalcMode = (mode) => {
@@ -359,11 +353,9 @@
             const mode = window.currentLeaderMode || 'auto';
             const resultsArea = document.getElementById('leader-results-area');
             
-            // Dados manuais
             const manualStartVal = document.getElementById('manual-start-date').value;
             const manualReturnVal = document.getElementById('manual-return-date').value;
 
-            // Lógica de Datas
             const monthIndex = parseInt(month) - 1; 
             const targetYear = parseInt(year);
             const firstDayOfMonth = new Date(targetYear, monthIndex, 1, 12, 0, 0);
@@ -376,7 +368,6 @@
             let returnDate = null;
             
             if (mode === 'auto') {
-                // Lógica Original (Automática)
                 leaves = leadershipLeaves.filter(l => {
                     if (!l.parsedDate) return false;
                     const lNick = l.nick.trim().toLowerCase();
@@ -405,14 +396,12 @@
                     }
                 }
             } else {
-                // Lógica Manual
                 if(manualStartVal) {
                     const partsStart = manualStartVal.split('-');
                     const mStart = new Date(partsStart[0], partsStart[1]-1, partsStart[2], 12, 0, 0);
-                    // Mockar objeto de licença
                     leaves.push({
-                        parsedDate: mStart, // Data da postagem da licença
-                        days: 30 // Assumir 30 dias padrão se não especificado, ou até o retorno
+                        parsedDate: mStart, 
+                        days: 30 
                     });
                 }
                 if(manualReturnVal) {
@@ -421,7 +410,6 @@
                 }
             }
 
-            // Cálculo de Dias
             let absentDaysCount = 0;
             let activeDaysCount = daysInMonth; 
             let statusColor = 'emerald';
@@ -431,13 +419,12 @@
 
             if (leaves.length > 0) {
                 const leave = leaves[leaves.length - 1];
-                const leaveDate = new Date(leave.parsedDate); // Data Postagem
+                const leaveDate = new Date(leave.parsedDate);
                 leaveDate.setHours(12,0,0,0);
 
                 const effectiveAbsenceStart = new Date(leaveDate);
-                effectiveAbsenceStart.setDate(leaveDate.getDate() + 1); // Conta a partir do dia seguinte
+                effectiveAbsenceStart.setDate(leaveDate.getDate() + 1); 
 
-                // Se manual, podemos não ter 'days', então assumimos infinito até retorno
                 const requestedDays = leave.days || 30; 
                 const expectedAbsenceEnd = new Date(leaveDate);
                 expectedAbsenceEnd.setDate(leaveDate.getDate() + requestedDays);
@@ -448,7 +435,6 @@
                     let currentDayCheck = new Date(targetYear, monthIndex, d, 12, 0, 0);
 
                     const isAfterStart = currentDayCheck.getTime() >= effectiveAbsenceStart.getTime();
-                    // Se manual e sem retorno definido, assume ausência até o fim do mês
                     const isWithinDuration = (mode === 'manual' && !returnDate) ? true : (currentDayCheck.getTime() <= expectedAbsenceEnd.getTime());
                     const isBeforeReturn = returnDate ? (currentDayCheck.getTime() < returnDate.getTime()) : true;
 
@@ -458,7 +444,7 @@
                 }
 
                 activeDaysCount = daysInMonth - absentDaysCount;
-                if(activeDaysCount < 0) activeDaysCount = 0; // Proteção
+                if(activeDaysCount < 0) activeDaysCount = 0; 
 
                 if (activeDaysCount < daysInMonth) {
                     statusColor = returnDate ? 'blue' : 'amber';
@@ -492,7 +478,6 @@
 
             const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&action=std&direction=2&head_direction=3&gesture=sml&size=l`;
 
-            // Render Results HTML
             resultsArea.innerHTML = `
                 <div class="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-3 opacity-10">
@@ -568,7 +553,6 @@
                 </div>
             `;
             
-            // Atualiza comportamento do botão confirmar com os dados recalculados
             const motivoGrat = `Cumprimento de meta do cargo de`;
             confirmBtn.style.display = 'inline-flex';
             confirmBtn.className = "btn-modal btn-modal-confirm flex items-center gap-2";
@@ -593,10 +577,9 @@
             };
         };
 
-        // Inicia
         cancelBtn.innerText = 'Fechar';
         cancelBtn.onclick = () => { modal.classList.remove('open'); };
-        setLeaderCalcMode('auto'); // Start auto
+        setLeaderCalcMode('auto'); 
         modal.classList.add('open');
     }
 
@@ -629,7 +612,7 @@
                 }
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+                const timeoutId = setTimeout(() => controller.abort(), 8000); 
 
                 const resp = await fetch(finalUrl, { signal: controller.signal });
                 clearTimeout(timeoutId);
@@ -720,25 +703,21 @@
             return { subject, message };
         }
         else if (status === 'Negativo') {
-            // Lógica modificada para usar o BBCode específico e a regra de exceção para Professor
             const isProfessor = cargo.toLowerCase().includes('professor');
             
-            // Configuração das variáveis baseada no cargo
             let tipoCarta = "META NÃO CUMPRIDA";
             let infracao = `não cumprimento da meta obrigatória referente ao cargo de [b]${cargo}[/b]`;
-            let medalhas = "15 Medalhas Efetivas Negativas"; // Padrão
+            let medalhas = "15 Medalhas Efetivas Negativas"; 
             let advertenciaTexto = " e uma Advertência Interna";
 
-            // Se for Professor, não recebe Advertência Interna, apenas notificação e desconto
             if (isProfessor) {
                 tipoCarta = "META NÃO CUMPRIDA"; 
-                medalhas = "10 Medalhas Efetivas Negativas"; // Professor geralmente perde 10
-                advertenciaTexto = ""; // Remove o texto da advertência
+                medalhas = "10 Medalhas Efetivas Negativas"; 
+                advertenciaTexto = ""; 
             } else if (cargo.toLowerCase().includes('graduador')) {
                 medalhas = "25 Medalhas Efetivas Negativas";
             }
             
-            // Novo BBCode conforme solicitado
             const bbcode = `[font=Poppins][table style="border: none!important; border-radius: 15px; width: auto; margin: 0 auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);" bgcolor="#79a8c3"][tr style="border: none!important"][td style="border: none!important; padding: 7px"][table style="border: none!important; width: 100%; border-radius: 15px;" bgcolor="#25313a"][tr style="border: none!important"][td style="border: none!important; padding: 14px"][img]https://i.imgur.com/S1tKqgc.gif[/img]
 [table style="border: none!important; border-radius: 40px; width: 40%; margin: -2% auto; position: relative;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important"][center][color=white][b][size=16]CARTA DE ${tipoCarta}[/size][/b][/color][/center]
 [/td][/tr][/table][table style="border: none!important; width: 100%; border-radius: 15px; line-height: 1.4em;" bgcolor="f8f8ff"][tr style="border: none!important"][td style="border: none!important"]
@@ -758,7 +737,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         else return null; 
     }
 
-    // 2. Envia a MP
     async function sendPrivateMessage(username, subject, message) {
         try {
             const composeResp = await fetch('/privmsg?mode=post', {
@@ -827,8 +805,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
 
     function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-
-    // --- LÓGICA DE MEDALHAS & BOTÕES ---
     const MEDAL_SHEET_ID = "1rfO0LHwXzRQnKfDvD4yVkVboEGG_OXFtpXHXBi3MFAY";
     const MEDAL_GID = "1008047655";
     let medalData = []; 
@@ -933,7 +909,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         checkActiveMembers(); 
     }
     
-    // Comparador de Ativos
     function checkActiveMembers() {
         const filteredText = document.getElementById('med-result').innerText;
         const activeInputText = document.getElementById('active-list-input').value;
@@ -1036,7 +1011,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         window.open(`https://www.policiarcc.com/h17-postagem-de-medalhas-af?responsavel_med=${encResp}&grupo_tarefas=Escola%20de%20Forma%C3%A7%C3%A3o%20de%20Executivos&periodo_med=${encDate}&gratificados_med=${encNicks}&numero_med=${finalPoints}&cargo_med=${encRole}&motivo_grat=${motivo}`, '_blank');
     }
 
-    // Botão Postar Punição
     async function sendPunishments() {
         const responsible = document.getElementById('med-responsible').value;
         const role = document.getElementById('med-role').value;
@@ -1128,12 +1102,10 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         showToast("Processo de envio de MPs finalizado.", "success");
     }
 
-    // --- CÓDIGO DA TABELA (METAS) ---
     const MASTER_BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAm7FkCrMwblbAPjFnuxoxeZNHdAc18M7bm-qR3k2YqB_i047AJ0LduIJjJ9iP7ZqT7dGpzFWtY2mp/pub";
     const TARGET_SHEET_NAME = "[EFE] Contador";
     const LOG_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPdKr_TJ6IMcLUFAavHVFaSg6e2vhjsALDFtQo2zMkmU5aQ3_KCUQGUex5fgYLoWnnuw/exec";
     
-    // Configurações da Planilha de Membros (Listagem)
     const MEMBERS_SHEET_ID = "1Y09nybDM7GdOMpO03QZyoh0UP1-Or0CYyV_shKh84Oc";
     const MEMBERS_GID = "1532718941";
     let membersCache = {};
@@ -1153,16 +1125,14 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
     let currentSheetTitle = '';
     let forumTokens = null; 
     
-    // Objeto temporário para guardar os dados da postagem enquanto o modal está aberto
     let pendingPostData = {
         cargo: '',
         title: '',
-        groupedStatuses: {} // Changed from strPositivos/Negativos to object map
+        groupedStatuses: {} 
     };
     
     const statusMap = { "[A]": { text: "Positivo", code: "A" }, "[B]": { text: "Negativo", code: "B" }, "[IS]": { text: "Isenção", code: "IS" }, "[DO]": { text: "Doação", code: "DO" }, "[J]": { text: "Justificada", code: "J" }, "[GP]": { text: "Grad. Pend.", code: "GP" }, "[RL]": { text: "Retorno", code: "RL" }, "[L]":  { text: "Licença", code: "L" }, "[CE]": { text: "Caso Esp.", code: "CE" }, "[Z]":  { text: "Caso Esp.", code: "CE" }, "[ER]": { text: "Entrada Recente", code: "ER" } };
     
-    // Mapping for Spreadsheet Column (Situacao)
     const SHEET_STATUS_MAP = {
         'A': 'Positivo', 'PRO': 'Positivo', 'POSITIVO': 'Positivo',
         'B': 'Negativo', 'NEGATIVO': 'Negativo',
@@ -1195,7 +1165,7 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         
         try {
             const url = `https://docs.google.com/spreadsheets/d/${MEMBERS_SHEET_ID}/export?gid=${MEMBERS_GID}&format=tsv`;
-            const tsvText = await fetchSmart(url, false); // false = não é GViz JSON, é raw TSV
+            const tsvText = await fetchSmart(url, false); 
             
             const today = new Date();
             today.setHours(12, 0, 0, 0); 
@@ -1301,7 +1271,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
             else btn.classList.remove('active');
         });
 
-        // Visibilidade do botão de Destaque
         const btnDestaque = document.getElementById('btn-destaque');
         if(rankName === 'Professor') btnDestaque.classList.remove('hidden');
         else btnDestaque.classList.add('hidden');
@@ -1389,6 +1358,7 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                 let isSuperior = false;
                 let promotionStatus = "";
                 let promotionLabel = ""; 
+                let forcePositive = false; // Novo flag para Recém-Promovidos
                 
                 const memberInfo = membersCache[nick.toLowerCase()];
                 
@@ -1408,6 +1378,13 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                         if(daysDiff <= limitDays) {
                             promotionStatus = "Recém-Promovido(a)";
                             promotionLabel = "Recém-Promovido(a)";
+                            
+                            // Lógica Específica para Recém-Promovidos
+                            if (currentRankKey === 'Professor' && cargoLower.includes('mentor')) forcePositive = true;
+                            if (currentRankKey === 'Mentor' && cargoLower.includes('capacitador')) forcePositive = true;
+                            if (currentRankKey === 'Capacitador' && cargoLower.includes('graduador')) forcePositive = true;
+                            if (currentRankKey === 'Graduador' && cargoLower.includes('estagiário')) forcePositive = true;
+                            
                         } else {
                             promotionStatus = memberInfo.cargo; 
                             promotionLabel = memberInfo.rawDate; 
@@ -1443,44 +1420,37 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                 });
                 
                 const rawStatus = cleanCell(cols[config.statusCol]);
+                // Se já estiver na planilha como CE, IS, etc, deve vir com o código correto
                 let statusObj = statusMap[rawStatus] || { text: (rawStatus === 'N/A' || !rawStatus) ? "Indefinido" : rawStatus, code: "DEFAULT" };
 
                 const hasDonation = (currentRankKey === 'Professor' && doaCount > 0);
                 let justification = "";
-
-                // --- LÓGICA DE METAS CORRIGIDA (REGRA < 2) ---
-                if (currentRankKey === 'Professor') {
-                    // Contagem total de ações (Aulas + Doações se houver)
-                    const totalApplied = classesSum + doaCount;
-                    
-                    // STATUS DE ISENÇÃO (Prioridade sobre matemática)
-                    const isExempt = ['[L]', '[RL]', '[IS]', '[ER]', '[CE]', '[GP]'].includes(rawStatus);
-
-                    if (isSuperior) {
-                        if (promotionStatus === "Recém-Promovido(a)") {
-                             statusObj = { text: promotionStatus, code: "PRO" };
-                        } else if (totalApplied >= 2) {
-                             statusObj = { text: promotionStatus, code: "PRO" };
-                        } else {
-                             // Superior que não fez a meta vira CE (conforme lógica padrão)
-                             statusObj = { text: "Caso Esp.", code: "CE" };
-                             justification = promotionStatus; 
-                        }
-                    } else {
-                        // Se não é superior e não tem isenção prévia na planilha
-                        if (!isExempt) {
-                            if (totalApplied >= 2) {
-                                statusObj = { text: "Positivo", code: "A" };
-                            } else {
-                                // Menos de 2 aulas = NEGATIVO [B]
-                                statusObj = { text: "Negativo", code: "B" }; 
-                            }
-                        }
-                    }
-                } else {
-                    if (isSuperior) statusObj = { text: promotionStatus, code: "PRO" };
-                }
                 
+                // PRIORIDADE DE STATUS:
+                
+                // 1. Recém-Promovidos específicos (Hierarquia)
+                if (forcePositive) {
+                    statusObj = { text: "Positivo", code: "A" };
+                }
+                // 2. Status Especial já na planilha (CE, IS, L, etc) - Mantém o que está lá
+                else if (['[CE]', '[IS]', '[L]', '[RL]', '[GP]', '[DO]', '[ER]', '[J]'].includes(rawStatus)) {
+                     statusObj = statusMap[rawStatus];
+                     if (rawStatus === '[CE]') justification = "";
+                }
+                // 3. Superior Genérico
+                else if (isSuperior) {
+                     statusObj = { text: promotionStatus, code: "PRO" };
+                }
+                // 4. Lógica de Pontos (Professor)
+                else if (currentRankKey === 'Professor') {
+                    const totalApplied = classesSum + doaCount;
+                    if (totalApplied >= 2) {
+                        statusObj = { text: "Positivo", code: "A" };
+                    } else {
+                        statusObj = { text: "Negativo", code: "B" }; 
+                    }
+                }
+
                 const avatarUrl = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick}&headonly=1&size=m`;
                 processedRows.push({ nick, classValues, total: totalPoints, statusObj, rawStatus, avatarUrl, isSuperior, justification, hasDonation, promotionLabel });
             }
@@ -1508,15 +1478,21 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
 
         rows.forEach((row, index) => {
             const classCells = row.classValues.map(v => `<td class="col-stat">${v > 0 ? v : '-'}</td>`).join('');
-            const optionsHtml = statusOptions.map(opt => `<option value="${opt.val}" ${row.rawStatus === opt.val ? 'selected' : ''}>${opt.label}</option>`).join('');
+            const optionsHtml = statusOptions.map(opt => `<option value="${opt.val}" ${row.statusObj.code === opt.val.replace(/\[|\]/g,'') || (opt.val === '[A]' && row.statusObj.code === 'PRO') ? 'selected' : ''}>${opt.label}</option>`).join('');
             const rowClass = row.isSuperior ? 'row-superior' : '';
             
-            // LÓGICA DO LABEL ABAIXO DO SELECT 
+            // Garantir que a seleção inicial reflita o código calculado ou o override
+            let selectedVal = row.userOverrideStatus || (row.statusObj.code === 'PRO' ? '[A]' : `[${row.statusObj.code}]`.replace('[[', '[').replace(']]', ']'));
+            
+            // Tratamento visual para o select inicial caso não bata com as options
+            let displaySelectLabel = row.statusObj.text;
+            if(row.statusObj.code === 'A' || row.statusObj.code === 'PRO') displaySelectLabel = 'Positivo';
+            if(row.statusObj.code === 'B') displaySelectLabel = 'Negativo';
+
             const superiorLabel = row.isSuperior 
                 ? `<span class="text-[9px] text-[#2c5282] font-extrabold uppercase tracking-wider block mt-1 ml-1 opacity-80">${row.promotionLabel || row.statusObj.text}</span>` 
                 : '';
             
-            // Se for Caso Especial (CE), mostra o input de justificativa já preenchido se houver valor
             const isCE = (row.statusObj.code === 'CE' || row.rawStatus === '[CE]');
             const justificationStyle = isCE ? 'visible' : '';
             const justifyValue = row.justification || '';
@@ -1529,7 +1505,7 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                     <td class="text-center"><span class="status-badge" data-code="${row.statusObj.code}">${row.statusObj.text}</span></td>
                     <td class="text-center"><div class="flex flex-col items-center justify-center p-2"><div class="table-select-wrapper w-full">
                                 <select class="table-select" onchange="updateRowStatus(${index}, this.value)">
-                                    <option value="${row.rawStatus}">${row.isSuperior ? (row.statusObj.code === 'A' || row.statusObj.code === 'PRO' ? 'Positivo' : 'Cargo Superior') : (row.statusObj.text !== 'Indef.' ? row.statusObj.text : 'Selecione')}</option>
+                                    <option value="${selectedVal}" selected hidden>${displaySelectLabel}</option>
                                     ${optionsHtml}
                                 </select></div><input type="text" id="justify-${index}" class="input-justification ${justificationStyle}" value="${justifyValue}" placeholder="Justifique..." oninput="updateRowJustification(${index}, this.value)">${superiorLabel}</div></td></tr>`;
         });
@@ -1557,9 +1533,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
     }
     function parseCSV(t) { return t.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)).filter(r => r.length > 1); }
 
-    // --- LOGICA DE POSTAGEM E COPIA (METAS) ---
-
-    // Função BBCode Corrigida: Respeita 100% a seleção manual (Dropdown)
     function generateBBCodeString(mode = "post") {
         if(!currentRenderData.length) return "";
         const config = RANK_CONFIG[currentRankKey];
@@ -1567,13 +1540,10 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         const periodText = config.period === 'QUINZENAL' ? 'META QUINZENAL' : 'META SEMANAL';
         const rankUpper = currentRankKey.toUpperCase();
         
-        // --- LOGICA DE DESTAQUE NOVA (Usando Template fornecido) ---
         if (mode === 'highlight') {
-            // Pega o 1º e 2º lugar da tabela já ordenada
             const d1 = currentRenderData[0];
             const d2 = currentRenderData[1];
             
-            // Define valores default caso não haja dados suficientes
             const nick1 = d1 ? d1.nick : "---";
             const nick2 = d2 ? d2.nick : "---";
             const refDate = currentSheetTitle || "DATA INDEFINIDA";
@@ -1590,19 +1560,15 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
 
 [table style="width: 50%; border: none!important; overflow: hidden; left: 29em; bottom: 3em; position: relative; z-index: 2"][tr style="border: none !important;"][td style="border: none!important; padding: 4px"][img]https://www.habbo.com.br/habbo-imaging/avatarimage?&user=${nick2}&action=std&direction=5&head_direction=4&img_format=png&gesture=std&headonly=1&size=b[/img][/td][/tr][/table]
 
-[table style="width: 30%; border: none!important; overflow: hidden; border-radius: 5px 5px 5px 5px; position: relative; margin-top: -8em; margin-left: 26em; font-family: 'Poppins', sans-serif; color: #ffffff; z-index: 1"][tr style="border: none!important;"][td style="width: auto; border: none!important; padding: 4px" bgcolor="e0e0e0"][b][color=#4d7684]${nick2}[/color][/b][/td][td style="width: 15%; border: none!important; padding: 4px"  bgcolor="5A7D91"][left]2º[/left][/td][/tr][/table]
+[table style="width: 30%; border: none!important; overflow: hidden; border-radius: 5px 5px 5px 5px; position: relative; margin-top: -8em; margin-left: 26em; font-family: 'Poppins', sans-serif; color: #ffffff; z-index: 1"][tr style="border: none!important;"][td style="width: auto; border: none!important; padding: 4px" bgcolor="e0e0e0"][b][color=#4d7684]${nick2}[/color][/b][/td][td style="width: 15%; border: none!important; padding: 4px"  bgcolor="5A7D91"][left]2º[/left][/td][/tr][/table]
 `;
         }
         
-        // --- LOGICA PADRÃO (POSTAGEM DE METAS) ---
         const destaques = []; const positivos = []; const negativos = []; const outros = [];
         
-        // LISTAS DE CLASSIFICAÇÃO RÍGIDAS
         const LISTA_POSITIVOS = ['[A]', '[PRO]', 'A', 'PRO', 'POSITIVO', 'RECÉM-PROMOVIDO(A)', 'PROMOVIDO(A)'];
-        // Apenas [B] ou Negativo explícito vai para o bloco de negativos no BBCode
         const LISTA_NEGATIVOS = ['[B]', 'B', 'NEGATIVO']; 
 
-        // --- DICIONÁRIO DE TRADUÇÃO DE STATUS (CORREÇÃO DE TEXTO) ---
         const STATUS_TRANSLATIONS = {
             'L': 'Licença', '[L]': 'Licença',
             'RL': 'Retorno de Licença', '[RL]': 'Retorno de Licença',
@@ -1618,26 +1584,19 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         };
 
         currentRenderData.forEach((row, index) => {
-            // LÓGICA DE PRIORIDADE:
-            // 1. Se o usuário mexeu no dropdown (userOverrideStatus), ISSO É LEI.
-            // 2. Se não mexeu, usa o cálculo automático (statusObj.code).
-            
             let finalCode = "";
             
             if (row.userOverrideStatus && row.userOverrideStatus !== 'Selecione') {
-                finalCode = row.userOverrideStatus; // Ex: [J], [B], [A], [DO]
+                finalCode = row.userOverrideStatus; 
             } else {
-                finalCode = row.statusObj.code; // Ex: A, B, PRO
-                // Normaliza para formato com colchetes se vier limpo (apenas para classificação)
+                finalCode = row.statusObj.code; 
                 if(finalCode === 'A') finalCode = '[A]';
                 if(finalCode === 'B') finalCode = '[B]';
                 if(finalCode === 'PRO') finalCode = '[PRO]';
             }
 
-            // Normalização de texto para comparação (Upper Case e sem espaços extras)
             let checkCode = String(finalCode).trim().toUpperCase();
 
-            // Lógica de Destaque para POST NORMAL (Apenas visual para o topo)
             const isHighlight = (index === 0 || index === 1) && (LISTA_POSITIVOS.includes(checkCode) || checkCode.includes('PRO'));
 
             if (isHighlight) {
@@ -1647,13 +1606,9 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                 positivos.push(row);
             } 
             else if (LISTA_NEGATIVOS.includes(checkCode)) {
-                // Só entra aqui se for estritamente [B] ou Negativo
                 negativos.push(row);
             } 
             else {
-                // "Cesto de Lixo" para Casos Especiais:
-                // Aqui caem: [J], [L], [IS], [DO], [GP], [CE], [RL], [ER]...
-                // E também qualquer coisa que o usuário selecionou que não seja A ou B.
                 outros.push(row);
             }
         });
@@ -1674,22 +1629,16 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
             return strParts.join('    ');
         };
 
-        // --- FUNÇÃO CORRIGIDA PARA EXIBIR TEXTO COMPLETO ---
         const getEndStatusBlock = (status, justification) => {
             let color = "7F8F96"; 
             let textColor = "white";
             
-            // 1. Tenta traduzir o código (ex: '[ER]' -> 'Entrada Recente')
-            // Se não achar no dicionário, usa o próprio texto (caso seja um override manual sem código)
             let text = STATUS_TRANSLATIONS[status] || status; 
 
-            // 2. Tratamento especial para Caso Especial com Justificativa
-            // Verifica se é CE pelo código ou pelo texto traduzido
             if(status.includes('CE') || text === 'Caso Especial') {
                 text = justification ? `Caso Especial (${justification})` : "Caso Especial";
             }
             
-            // Remove colchetes se sobrou algum (fallback visual)
             text = text.replace(/[\[\]]/g, '');
 
             return `[td style="border: none!important; overflow: hidden; padding: 5px" bgcolor="${color}"][color=${textColor}][b]${text}[/b][/color][/td][/tr][/table]`;
@@ -1703,11 +1652,8 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         };
 
         const generateStandardRow = (row, type) => {
-            // Pega o status cru (que pode ser [L], L, [GP], GP, etc)
             let status = row.userOverrideStatus || row.statusObj.code;
             
-            // Normalização APENAS para os ícones/cores de Positivo/Negativo
-            // Não afeta o texto do "Outros" porque passamos o 'status' original para getEndStatusBlock
             let displayStatus = status;
             if(displayStatus === 'A') displayStatus = '[A]';
             if(displayStatus === 'B') displayStatus = '[B]';
@@ -1721,13 +1667,11 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
             let html = `[table style="border: none!important; overflow: hidden; border-radius: 5px; width: auto; padding: 0; margin: 5px;"][tr style="border: none!important; overflow: hidden" bgcolor="DCDCE3"][td style="border: none!important; overflow: hidden;padding: 5px"][color=${dotColor}][b]• [/color]${row.nick}[/b][/td][td style="border: none!important; overflow: hidden; padding: 5px" bgcolor="${nameBg}"][color=white][b]${row.total} ${labelTotal}[/b][/color][/td]`;
             if (classesStr) html += `[td style="border: none!important; overflow: hidden; padding: 5px" bgcolor="647882"][color=white][b]${classesStr}[/b][/color][/td]`;
             
-            // Verifica Doação Visualmente
             if (row.hasDonation || status === '[DO]' || status === 'DO') {
                  html += `[td style="border: none!important; overflow: hidden; padding: 5px" bgcolor="FFD966"][color=black][b]<i class="fas fa-donate"></i>[/b][/color][/td]`;
             } 
 
             if (type === 'outros') {
-                // AQUI ESTÁ O SEGREDO: Passamos o status original para ser traduzido
                 html += getEndStatusBlock(status, row.justification);
             }
             else html += `[/tr][/table]`;
@@ -1746,10 +1690,9 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
             config.headerLabels.forEach((label, idx) => { if(footerSums[idx] > 0) footerBlocks += `[td style="border: none!important; overflow: hidden;padding: 0px"][table style="box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);border: none!important; overflow: hidden; border-radius: 5px; width: auto; padding: 0; margin: 5px;"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden;padding: 7px" bgcolor="647882"][color=white][b]${label}[/b][/color][/td][td style="border: none!important; overflow: hidden; padding: 7px" bgcolor="79a8c3"][color=white][b]${footerSums[idx]}[/b][/color][/td][/tr][/table][/td]`; });
         }
         
-        return `[font=Poppins][table style="border: none!important; overflow: hidden; border-radius: 15px; width: auto; padding: 0; margin: 0 auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); text-align: center;" bgcolor="#79a8c3"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 7px"][table style="line-height: 0.2em; width: 100%; border-radius: 15px; border: none!important; overflow: hidden; line-height: 0.5em; margin: 0 auto;" bgcolor="#25313a"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 14px"][img]https://i.imgur.com/S1tKqgc.gif[/img]\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; margin: -2% auto; top: 0.8em; position: relative; z-index: 10; justify-content: center;" bgcolor="79a8c3"][tr style="border: none!important;"][td style="border: none!important;"][center][color=white][b][size=16]${periodText} - ${rankUpper}ES[/size][/b][/color][/center][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);line-height: 1.4em; margin: 0 auto;" bgcolor="f8f8ff"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\nSaudações, [color=#79a8c3][b]{USERNAME}[/b][/color]. Verifique abaixo a meta de ${rankUpper.toLowerCase()}es do período de [color=#79a8c3][b]${titleMeta}[/b][/color]:\n[center][table style="width: 20%; border-radius: 10px;border: none!important; overflow: hidden; line-height: 1em; margin-top:1em" bgcolor="79a8c3"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 1px"][/td][/tr][/table][/center]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]DESTAQUES[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockDestaques || '[center]Sem destaques nesta semana.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="93c47d"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]POSITIVOS[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockPositivos || '[center]Nenhum positivo.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="e06666"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]NEGATIVOS[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockNegativos || '[center]Nenhum negativo.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="9BAFB8"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]CASO ESPECIAL[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockOutros || '[center]Nenhum caso especial.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[center][font=Poppins][table style="border: none!important; overflow: hidden; border-radius: 5px; width: auto; margin: 1px;"][tr style="border: none!important; overflow: hidden"]\n${footerBlocks}\n[/tr][/table][/font][/center][/td][/tr][/table]\n\n[size=11][color=white]<i class="fas fa-code"></i> Desenvolvido por [b].Brendon[/b] | Todos os direitos reservados à [b]Escola de Formação de Executivos[/b].[/color][/size]\n[/td][/tr][/table][/td][/tr][/table][/font]`;
+        return `[font=Poppins][table style="border: none!important; overflow: hidden; border-radius: 15px; width: auto; padding: 0; margin: 0 auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); text-align: center;" bgcolor="#79a8c3"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 7px"][table style="line-height: 0.2em; width: 100%; border-radius: 15px; border: none!important; overflow: hidden; line-height: 0.5em; margin: 0 auto;" bgcolor="#25313a"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 14px"][img]https://i.imgur.com/S1tKqgc.gif[/img]\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; margin: -2% auto; top: 0.8em; position: relative; z-index: 10; justify-content: center;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important;"][center][color=white][b][size=16]${periodText} - ${rankUpper}ES[/size][/b][/color][/center][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);line-height: 1.4em; margin: 0 auto;" bgcolor="f8f8ff"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\nSaudações, [color=#79a8c3][b]{USERNAME}[/b][/color]. Verifique abaixo a meta de ${rankUpper.toLowerCase()}es do período de [color=#79a8c3][b]${titleMeta}[/b][/color]:\n[center][table style="width: 20%; border-radius: 10px;border: none!important; overflow: hidden; line-height: 1em; margin-top:1em" bgcolor="79a8c3"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden; padding: 1px"][/td][/tr][/table][/center]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="79a8c3"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]DESTAQUES[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockDestaques || '[center]Sem destaques nesta semana.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="93c47d"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]POSITIVOS[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockPositivos || '[center]Nenhum positivo.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="e06666"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]NEGATIVOS[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockNegativos || '[center]Nenhum negativo.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[table style="border: none!important; border-radius: 40px; overflow: hidden; width: 40%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin: -2% auto; top: 1.2em; right: 45%; position: relative; z-index: 10; justify-content: center;" bgcolor="9BAFB8"][tr style="border: none!important"][td style="border: none!important;"][right][color=white][b][size=14]CASO ESPECIAL[/size][/b][/color][/right][/td][/tr][/table]\n[table style="width: 100%; border-radius: 15px; border: none!important; overflow: hidden; position: relative; z-index: 1;line-height: 1.4em; margin: 0 auto;" bgcolor="EEEEF7"][tr style="border: none!important; overflow: hidden"][td style="border: none!important; overflow: hidden"]\n\n[justify]\n${blockOutros || '[center]Nenhum caso especial.[/center]'}\n[/justify]\n[/tr][/td][/table]\n\n[center][font=Poppins][table style="border: none!important; overflow: hidden; border-radius: 5px; width: auto; margin: 1px;"][tr style="border: none!important; overflow: hidden"]\n${footerBlocks}\n[/tr][/table][/font][/center][/td][/tr][/table]\n\n[size=11][color=white]<i class="fas fa-code"></i> Desenvolvido por [b].Brendon[/b] | Todos os direitos reservados à [b]Escola de Formação de Executivos[/b].[/color][/size]\n[/td][/tr][/table][/td][/tr][/table][/font]`;
     }
 
-    // Função Copiar BBCode
     function copyBBCode() {
         const bbcode = generateBBCodeString();
         if(!bbcode) return;
@@ -1765,7 +1708,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         });
     }
 
-    // Função Postar Destaques (Professor apenas, T=7)
     async function postHighlights() {
         if(currentRankKey !== 'Professor') return;
         
@@ -1781,10 +1723,8 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
             return;
         }
 
-        // 2. Gerar BBCode específico
         const bbcode = generateBBCodeString('highlight');
 
-        // 3. Postar
         try {
             submitForumPost(bbcode);
             showToast("Destaques postados com sucesso!", "success");
@@ -1794,13 +1734,11 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-trophy"></i> <span>Postar Destaques</span>';
-            // Restaura tokens originais do cargo
             const config = RANK_CONFIG[currentRankKey];
             if(config) fetchTopicTokens(config.topicId); 
         }
     }
 
-    // Função Postar Metas Original (TriggerPost)
     async function sendToSheet(metaTitle, cargo, situacao, nicks) {
         if (!nicks || nicks.trim() === '') return;
         const payload = { sheet: "Metas", rows: [[metaTitle, cargo, situacao, nicks]] };
@@ -1813,53 +1751,39 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         } catch (error) { console.error("Erro log sheet", error); }
     }
 
-    // ========================================================
-    // LÓGICA DE MODAL DE CONFIRMAÇÃO DE POSTAGEM (ATUALIZADA)
-    // ========================================================
-
-    // Passo 1: Abre o modal e preenche os dados
    async function triggerPost() {
         if(!currentRenderData.length) return;
         
-        // Gera o BBCode (Visual do Fórum)
         const bbcode = generateBBCodeString('post');
         const config = RANK_CONFIG[currentRankKey];
         const titleMeta = currentSheetTitle || "TÍTULO";
         const cargoFormatted = currentRankKey + "(a)";
         
-        // --- FILTRAGEM E AGRUPAMENTO PARA A PLANILHA ---
-        // Agora agrupa por código de status em vez de apenas Pos/Neg
         const groupedStatuses = {};
 
         currentRenderData.forEach((row) => {
-            // 1. REGRA DE OURO: O Override manual tem prioridade total.
             let finalStatus = (row.userOverrideStatus && row.userOverrideStatus !== 'Selecione') 
                 ? row.userOverrideStatus 
                 : row.statusObj.code;
             
-            // 2. Limpeza
             let cleanStatus = String(finalStatus).trim().toUpperCase().replace(/[\[\]]/g, '');
 
-            // 3. Agrupamento
             if (!groupedStatuses[cleanStatus]) {
                 groupedStatuses[cleanStatus] = [];
             }
             groupedStatuses[cleanStatus].push(row.nick);
         });
 
-        // Prepara o objeto para envio posterior
         pendingPostData = {
             cargo: cargoFormatted,
             title: titleMeta,
             groupedStatuses: groupedStatuses
         };
 
-        // --- ATUALIZA A UI DO MODAL ---
         document.getElementById('post-input-cargo').value = cargoFormatted;
         document.getElementById('post-input-title').value = titleMeta;
         document.getElementById('post-input-bbcode').value = bbcode;
         
-        // Reseta estados visuais
         document.getElementById('bbcode-editor-container').classList.add('hidden');
         const btnToggleText = document.getElementById('btn-toggle-text');
         btnToggleText.innerText = "Editar BBCode";
@@ -1889,18 +1813,14 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
              document.getElementById('post-confirm-modal').classList.remove('open');
         };
         
-        // Abre o modal
         document.getElementById('post-confirm-modal').classList.add('open');
     }
 
-    // Passo 2: Executa a ação final ao confirmar
     async function confirmPostAction() {
-        // Pega os valores (possivelmente editados) do modal
         const finalCargo = document.getElementById('post-input-cargo').value;
         const finalTitle = document.getElementById('post-input-title').value;
         const finalBBCode = document.getElementById('post-input-bbcode').value;
 
-        // UI Feedback dentro do Modal
         const btnConfirm = document.getElementById('btn-modal-post-confirm');
         const btnCancel = document.getElementById('btn-modal-post-cancel');
         
@@ -1911,10 +1831,8 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         showToast("Processando postagem e registro...", "info");
 
         try {
-            // 1. Posta no Fórum
             submitForumPost(finalBBCode);
             
-            // 2. Envia para a Planilha (Iterando sobre TODOS os grupos encontrados)
             const groups = pendingPostData.groupedStatuses;
             const statusKeys = Object.keys(groups);
             
@@ -1923,19 +1841,16 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
                 const nicks = groups[code];
                 const nicksStr = nicks.join(' / ');
                 
-                // Mapeia o código (Ex: 'A' -> 'Positivo', 'L' -> 'Licença')
                 const sheetStatus = SHEET_STATUS_MAP[code] || code;
 
-                // Envia com pequeno delay entre requisições para não sobrecarregar
                 await new Promise(r => setTimeout(r, 500));
                 sendToSheet(finalTitle, finalCargo, sheetStatus, nicksStr);
             }
             
-            // Feedback de Sucesso no Botão
             setTimeout(() => {
                 btnConfirm.innerHTML = '<i class="fas fa-check"></i> Postado! Pode fechar.';
-                btnConfirm.style.background = "#10b981"; // Verde
-                btnCancel.disabled = false; // Permite fechar agora
+                btnConfirm.style.background = "#10b981"; 
+                btnCancel.disabled = false; 
                 btnCancel.innerText = "Fechar";
                 showToast("Postagem realizada e todos os status salvos!", "success");
             }, 3500);
@@ -1971,9 +1886,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         form.submit();
         setTimeout(() => document.body.removeChild(form), 2000);
     }
-    // =========================================================
-    // === MÓDULO MINISTÉRIO ===
-    // =========================================================
 
     let ministryData = {
         date: "",
@@ -1992,7 +1904,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         const tabLead = document.getElementById('subtab-leadership');
         const tabMin = document.getElementById('subtab-ministry');
 
-        // Reseta tudo
         generalView.classList.add('hidden');
         leadView.classList.add('hidden');
         minView.classList.add('hidden');
@@ -2018,7 +1929,6 @@ Saudações, [color=#79a8c3][b]{USERNAME}[/b][/color]
         const text = document.getElementById('min-input-text').value;
         const dateInput = document.getElementById('min-detected-date');
         
-        // Reseta dados
         ministryData = { date: "", ministers: { positive: [], negative: [] }, interns: { positive: [], negative: [] }, unknown: { positive: [], negative: [] } };
         
         if(!text) { 
