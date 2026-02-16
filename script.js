@@ -1,4 +1,4 @@
-   // GLOBAL GRATIFICATION LIST
+ // GLOBAL GRATIFICATION LIST
     let globalGratificationSet = new Set();
 
     // Helper for cleaning cells globally
@@ -669,9 +669,7 @@
 
         // Improved proxy list and order
         const proxies = [
-            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-            (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+            (url) => `https://proxy.reinasdev.workers.dev/?url=${encodeURIComponent(url)}`
         ];
         
         for (const proxyGen of proxies) {
